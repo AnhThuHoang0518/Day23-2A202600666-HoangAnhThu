@@ -229,6 +229,26 @@ Expected successful output:
 Metrics valid. success_rate=100.00%
 ```
 
+## Grading Questions
+
+The file `grading_questions.json` was also executed through the current graph and the results are saved in:
+
+```text
+outputs/grading_questions_results.json
+reports/grading_questions_report.md
+```
+
+Current grading-question summary:
+
+| Metric | Value |
+|---|---:|
+| Total questions | 10 |
+| Phrase success rate | 30% |
+| Top-1 document success rate | 0% |
+| Overall success rate | 0% |
+
+Important note: these grading questions include `expect_top1_doc_id` checks, but this LangGraph lab does not include a retrieval corpus with those document IDs. Because of that, top-1 document checks are reported as unavailable/failing in `reports/grading_questions_report.md` instead of being inferred.
+
 ## Make Commands
 
 The Makefile is available for Unix-like shells:
