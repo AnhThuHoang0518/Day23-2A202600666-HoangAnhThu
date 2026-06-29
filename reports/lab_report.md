@@ -1,36 +1,4 @@
-"""Report generation helper."""
-
-from __future__ import annotations
-
-from pathlib import Path
-
-from .metrics import MetricsReport
-from .observability import langsmith_project_name
-
-
-def render_report(metrics: MetricsReport) -> str:
-    """Render a complete markdown lab report from metrics data."""
-    rows = []
-    row_template = (
-        "| {scenario} | {expected} | {actual} | {success} | "
-        "{retries} | {interrupts} | {approval} |"
-    )
-    for item in metrics.scenario_metrics:
-        rows.append(
-            row_template.format(
-                scenario=item.scenario_id,
-                expected=item.expected_route,
-                actual=item.actual_route or "",
-                success="yes" if item.success else "no",
-                retries=item.retry_count,
-                interrupts=item.interrupt_count,
-                approval=item.approval_action or "",
-            )
-        )
-    scenario_table = "\n".join(rows)
-    project_name = langsmith_project_name()
-
-    return f"""# Day 08 LangGraph Agent Lab Report
+# Day 08 LangGraph Agent Lab Report
 
 ## 1. Architecture
 
@@ -69,18 +37,24 @@ than scenario-id matching.
 
 | Metric | Value |
 |---|---:|
-| Total scenarios | {metrics.total_scenarios} |
-| Success rate | {metrics.success_rate:.2%} |
-| Average nodes visited | {metrics.avg_nodes_visited:.2f} |
-| Average latency ms | {metrics.avg_latency_ms:.2f} |
-| Total retries | {metrics.total_retries} |
-| Total interrupts/approvals | {metrics.total_interrupts} |
-| Approval observations | {metrics.total_approvals} |
-| Approval rate | {metrics.approval_rate:.2%} |
+| Total scenarios | 7 |
+| Success rate | 100.00% |
+| Average nodes visited | 7.00 |
+| Average latency ms | 0.00 |
+| Total retries | 3 |
+| Total interrupts/approvals | 2 |
+| Approval observations | 2 |
+| Approval rate | 100.00% |
 
 | Scenario | Expected route | Actual route | Success | Retries | Interrupts | Approval action |
 |---|---|---|---:|---:|---:|---|
-{scenario_table}
+| S01_simple | simple | simple | yes | 0 | 0 |  |
+| S02_tool | tool | tool | yes | 0 | 0 |  |
+| S03_missing | missing_info | missing_info | yes | 0 | 0 |  |
+| S04_risky | risky | risky | yes | 0 | 1 | approve |
+| S05_error | tool | tool | yes | 2 | 0 |  |
+| S06_delete | risky | risky | yes | 0 | 1 | approve |
+| S07_dead_letter | tool | tool | yes | 1 | 0 |  |
 
 ## 5. Failure Analysis
 
@@ -102,7 +76,7 @@ fast local tests, and the `sqlite` backend can persist checkpoints to
 
 | Item | Value |
 |---|---|
-| LangSmith project | {project_name} |
+| LangSmith project | phase2-track3-day8-langgraph-lab |
 | Tags | `day8`, `langgraph`, `lab` |
 | Run metadata | `scenario_id`, `lab=phase2-track3-day8` |
 
@@ -140,11 +114,3 @@ The screenshots are stored in `reports/langsmith_trace/`.
 With more production time, I would add a real approval UI for interrupt/resume, richer tool
 contracts, latency timing around each node, regression tests for hidden route phrasing, and
 state-history replay examples for crash recovery.
-"""
-
-
-def write_report(metrics: MetricsReport, output_path: str | Path) -> None:
-    """Write the rendered report to a file."""
-    path = Path(output_path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(render_report(metrics), encoding="utf-8")
